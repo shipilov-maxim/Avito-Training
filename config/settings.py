@@ -54,22 +54,39 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'HOST': os.environ.get('POSTGRES_HOST'),
+    #     'NAME': os.environ.get('POSTGRES_DB'),
+    #     'USER': os.environ.get('POSTGRES_USER'),
+    #     'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+    #     'PORT': os.environ.get('POSTGRES_PORT'),
+    #
+    # },
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'HOST': os.environ.get('POSTGRES_HOST'),
-        'NAME': os.environ.get('POSTGRES_DB'),
-        'USER': os.environ.get('POSTGRES_USER'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'PORT': os.environ.get('POSTGRES_PORT', 5432),
-
+        "ENGINE": "djongo",
+        "NAME": os.environ.get('MONGO_DB_NAME'),
+        'ENFORCE_SCHEMA': False,
+        "CLIENT": {
+            "host": os.environ.get('MONGO_DB_HOST'),
+            "port": int(os.environ.get('MONGO_DB_PORT')),
+            # "username": os.environ.get('MONGO_DB_USERNAME'),
+            # "password": os.environ.get('MONGO_DB_PASSWORD'),
+        },
+        # 'TEST': {
+        #     'MIRROR': 'default',
+        # },
     }
 }
 
-MONGO_DB = os.getenv('MONGO_DB')
-MONGO_HOST = os.getenv('MONGO_HOST')
-MONGO_PORT = os.getenv('MONGO_PORT')
-MONGO_USERNAME = os.getenv('MONGO_USERNAME')
-MONGO_PASSWORD = os.getenv('MONGO_PASSWORD')
+# DATABASE_ROUTERS = ['app.utils.db_routers.NonRelRouter', ]
+
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_IGNORE_RESULT = True
+CELERY_BROKER_URL = os.environ.get('CELERY_URL')
+CELERYD_HIJACK_ROOT_LOGGER = False
+REDIS_CHANNEL_URL = os.environ.get('REDIS_CHANNEL_URL')
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

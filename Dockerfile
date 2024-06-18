@@ -1,29 +1,9 @@
-FROM python:3.7
+FROM python:3.8
 
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && apt-get install -y \
-    build-essential \
-    libssl-dev \
-    libffi-dev \
-    python3-dev \
-    build-essential \
-    libjpeg-dev \
-    zlib1g-dev \
-    gcc \
-    libc-dev \
-    bash \
-    git \
-    && pip3 install --upgrade pip
+WORKDIR /code
 
+COPY ./requirements.txt .
 
-ENV LIBRARY_PATH=/lib:/usr/lib
-
-ENV PYTHONUNBUFFERED 1
-ENV PYTHONDONTWRITEBYTECODE 1
-
-WORKDIR .
+RUN pip install --upgrade pip && pip install -r requirements.txt --no-cache-dir
 
 COPY . .
-
-RUN pip3 --no-cache-dir install -r requirements.txt

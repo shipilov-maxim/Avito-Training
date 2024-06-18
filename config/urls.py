@@ -16,6 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from app.views import post_generator, SecretCreateAPIView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', post_generator),
+    path('secret/', SecretCreateAPIView.as_view())
 ]

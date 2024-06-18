@@ -7,12 +7,6 @@ services:
     container_name: mongo
     restart: always
     env_file: .env
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=root
-      - MONGO_INITDB_DATABASE=${MONGO_DB_NAME}
-      - MONGO_INITDB_USERNAME=${MONGO_DB_USERNAME}
-      - MONGO_INITDB_PASSWORD=${MONGO_DB_PASSWORD}
     volumes:
       - ./_data/mongo:/data/db
       - ./docker/_mongo/fixtures:/import
@@ -22,14 +16,9 @@ services:
 
   postgres:
     container_name: postgres
-    image: postgres:12
+    image: postgres:14
     restart: on-failure
     env_file: .env
-    environment:
-      - POSTGRES_DB=app_db
-      - POSTGRES_USER=app_db_user
-      - POSTGRES_PASSWORD=supersecretpassword
-      - POSTGRES_PORT=5432
     ports:
       - '5432:5432'
     volumes:
@@ -42,15 +31,10 @@ services:
       timeout: 5s
 
   redis:
-    image: redis:6
-    container_name: redis
-    restart: always
-    env_file: .env
-    command: redis-server --requirepass $REDIS_PASSWORD
-    ports:
-      - '6379:6379'
-    volumes:
-      - ./_data/redis:/var/lib/redis
+    image: redis:latest
+    restart: on-failure
+    expose:
+      - '6379'
 
   app:
     build: .
@@ -59,7 +43,8 @@ services:
     tty: true
     restart: on-failure
     command: >
-      sh -c "python manage.py migrate &&
+      sh -c "python manage.py wait_for_db &&
+             python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     env_file: .env
     volumes:
@@ -72,33 +57,36 @@ services:
 
   celery:
     build: .
-    image: app:latest
-    container_name: celery
+    tty: true
+    command: [
+            "celery",
+            "-A",
+            "config",
+            "worker",
+            "-c",
+            "1",
+            "-l",
+            "INFO",
+            "--without-heartbeat",
+            "--without-gossip",
+            "--without-mingle",
+          ]
+
     restart: on-failure
-    command: celery -A config worker -l INFO
-#    command: [
-#      "celery",
-#      "-A",
-#      "config",
-#      "worker",
-#      "-c",
-#      "1",
-#      "-l",
-#      "INFO",
-#      "--without-heartbeat",
-#      "--without-gossip",
-#      "--without-mingle",
-#    ]
-    env_file: .env
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - app
+      - postgres
+    env_file:
+      - .env
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings
       - DJANGO_WSGI=config.wsgi
       - DEBUG=False
-    volumes:
-      - .:/app
-    depends_on:
-      postgres:
-        condition: service_healthy
 
+volumes:
+  pg_data:
 networks:
   default:
