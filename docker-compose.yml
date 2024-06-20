@@ -68,6 +68,20 @@ services:
       - DJANGO_SETTINGS_MODULE=config.settings
       - DJANGO_WSGI=config.wsgi
 
+  celery-beat:
+    build: .
+    tty: true
+    command: celery -A config beat -l INFO
+    restart: on-failure
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - app
+      - mongo
+    env_file:
+      - .env
+
 volumes:
   pg_data:
 networks:

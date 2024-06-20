@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -74,6 +75,13 @@ CELERY_IGNORE_RESULT = True
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
 CELERYD_HIJACK_ROOT_LOGGER = False
 REDIS_CHANNEL_URL = os.environ.get('REDIS_CHANNEL_URL')
+
+CELERY_BEAT_SCHEDULE = {
+    'task-name': {
+        'task': 'app.tasks.check_expired_secret',
+        'schedule': timedelta(seconds=10),
+    },
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
