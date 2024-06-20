@@ -7,6 +7,7 @@ class Secret(models.Model):
     password = models.CharField(max_length=1000, blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    expired_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         ordering = ("-created_at",)

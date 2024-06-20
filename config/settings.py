@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -20,6 +21,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'drf_yasg',
+
     'app',
 ]
 
@@ -54,15 +58,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'HOST': os.environ.get('POSTGRES_HOST'),
-    #     'NAME': os.environ.get('POSTGRES_DB'),
-    #     'USER': os.environ.get('POSTGRES_USER'),
-    #     'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-    #     'PORT': os.environ.get('POSTGRES_PORT'),
-    #
-    # },
     'default': {
         "ENGINE": "djongo",
         "NAME": os.environ.get('MONGO_DB_NAME'),
@@ -70,23 +65,23 @@ DATABASES = {
         "CLIENT": {
             "host": os.environ.get('MONGO_DB_HOST'),
             "port": int(os.environ.get('MONGO_DB_PORT')),
-            # "username": os.environ.get('MONGO_DB_USERNAME'),
-            # "password": os.environ.get('MONGO_DB_PASSWORD'),
         },
-        # 'TEST': {
-        #     'MIRROR': 'default',
-        # },
     }
 }
-
-# DATABASE_ROUTERS = ['app.utils.db_routers.NonRelRouter', ]
 
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_IGNORE_RESULT = True
-CELERY_BROKER_URL = os.environ.get('CELERY_URL')
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
 CELERYD_HIJACK_ROOT_LOGGER = False
 REDIS_CHANNEL_URL = os.environ.get('REDIS_CHANNEL_URL')
+
+CELERY_BEAT_SCHEDULE = {
+    'task-name': {
+        'task': 'app.tasks.check_expired_secret',
+        'schedule': timedelta(seconds=10),
+    },
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
