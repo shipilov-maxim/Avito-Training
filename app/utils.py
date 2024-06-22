@@ -1,7 +1,5 @@
 from cryptography.fernet import Fernet
 import base64
-import logging
-import traceback
 from django.conf import settings
 
 
@@ -13,7 +11,7 @@ def encrypt(pas):
         encrypt_pass = base64.urlsafe_b64encode(encrypt_pass).decode("UTF-8")
         return encrypt_pass
     except Exception:
-        logging.getLogger("error_logger").error(traceback.format_exc())
+        print('Errror')
         return None
 
 
@@ -24,5 +22,5 @@ def decrypt(pas):
         decod_pass = cipher_pass.decrypt(pas).decode("UTF-8")
         return decod_pass
     except Exception:
-        logging.getLogger("error_logger").error(traceback.format_exc())
+        print('Errror')
         return None
